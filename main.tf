@@ -142,11 +142,17 @@ resource "aws_instance" "myapp-server" {
         private_key = file(var.private_key_location)
     }
 
+    provisioner "file" {
+        source = "entry-script.sh"
+        destination = "/home/ec2-user/entry-script.sh"
+    }
+
     provisioner "remote-exec" {
-        inline = [
-            "export ENV=dev",
-            "mkdir newdir"
-        ]
+        script = file("entry-script.sh")
+    }
+
+    provisioner "local-exec" {
+        command = "echo ${self.public_ip} > output-ip.txt"
     }
 
     tags = {
